@@ -1,0 +1,139 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.0.0/css/bootstrap.min.css">
+  <style>
+    html {
+      font-family: Arial, sans-serif;
+      background-color: #f2f2f2;
+    }
+
+    body {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    h2 {
+      font-size: 2rem;
+      color: #333;
+      margin-bottom: 30px;
+      text-align: center;
+    }
+
+    .card {
+      background-color: #fff;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+    }
+
+    .icon {
+      font-size: 4rem;
+    }
+
+    .temperature,
+    .humidity,
+    .flame {
+      font-size: 2rem;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    .flame {
+      color: #ccc;
+    }
+
+    .flame-detected {
+      color: #e60a15;
+      animation: beat 1s infinite;
+      transform-origin: center;
+    }
+
+    .alert-card {
+      display: none;
+      background-color: #e60a15;
+      color: #fff;
+      text-align: center;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+
+    .caution {
+      font-size: 4rem;
+      color: #ffeb3b;
+    }
+
+    @keyframes beat {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+      100% { transform: scale(1); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2> Home Automation and Monitoring System </h2>
+    <div class="row">
+      <div class="col-md-6">
+        <div class="card">
+          <i class="fas fa-thermometer-half icon" style="color:#059e8a;"></i>
+          <p class="temperature">Temperature: <span id="temperature">%TEMPERATURE%</span>&deg;C</p>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card">
+          <i class="fas fa-tint icon" style="color:#00add6;"></i>
+          <p class="humidity">Humidity: <span id="humidity">%HUMIDITY%</span>%</p>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <i class="fas fa-fire icon" id="flame-icon"></i>
+      <p class="flame" id="flame">%FLAME%</p>
+    </div>
+    <div class="alert-card">
+      <i class="fas fa-exclamation-triangle caution"></i>
+      <h4>Alert!</h4>
+      <p>Flame detected! Please take immediate action.</p>
+    </div>
+  </div>
+
+  <script>
+    setInterval(function() {
+      getData();
+    }, 2000);
+
+    function getData() {
+      var xhttp = new XMLHttpRequest();
+      xhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+          var response = JSON.parse(this.responseText);
+          document.getElementById("temperature").innerHTML = response.temperature.toFixed(2);
+          document.getElementById("humidity").innerHTML = response.humidity.toFixed(2);
+          var flameElement = document.getElementById("flame");
+          var flameIcon = document.getElementById("flame-icon");
+          var alertCard = document.querySelector('.alert-card');
+          if (response.flameStatus === 0) {
+            flameElement.innerHTML = "No Flame, Enjoy your life!";
+            flameElement.classList.remove('flame-detected');
+            flameIcon.style.color = "#ccc";
+            alertCard.style.display = "none";
+          } else {
+            flameElement.innerHTML = "Flame Detected! Hooraaay!!";
+            flameElement.classList.add('flame-detected');
+            flameIcon.style.color = "#e60a15";
+            alertCard.style.display = "block";
+          }
+        }
+      };
+      xhttp.open("GET", "/data", true);
+      xhttp.send();
+    }
+  </script>
+</body>
+</html>
