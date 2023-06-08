@@ -31,6 +31,8 @@ To set up the hardware components of the Home Automation and Monitoring System, 
 - Flame detection sensor
 - Wires for connecting the sensors to the ESP8266
 
+![Setup Image](setup.jpeg)
+
 Follow these steps to set up the hardware:
 
 1. Connect the temperature and humidity sensor to the ESP8266 using appropriate wires. Refer to the datasheet or documentation of your sensor for pin connections.
