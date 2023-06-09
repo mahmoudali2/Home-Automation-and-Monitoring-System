@@ -1,3 +1,6 @@
+
+//ijlhqbjzhxkaoflf
+// include the libraries
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
 #include <Hash.h>
@@ -7,9 +10,16 @@
 #include <DHT.h>
 #include <FS.h>
 #include <ArduinoJson.h>
+#include <LiquidCrystal.h>
+#include <ESP_Mail_Client.h>
+
+
 
 const char* ssid = "Mahmoud iPhone";
 const char* password = "neutrino";
+
+const int rs = 16, en = 4, d4 = 2, d5 = 0, d6 = 12, d7 = 13;
+LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 
 #define DHTPIN 14       // D5 - Digital pin connected to the DHT sensor
 #define flamePin 5      // D1 - Digital pin connected to the flame sensor
@@ -56,6 +66,8 @@ String processor(const String& var) {
 }
 
 void setup() {
+
+  lcd.begin(16, 2);
   pinMode(flamePin, INPUT);
   Serial.begin(115200);
   dht.begin();
@@ -64,8 +76,12 @@ void setup() {
   while (WiFi.status() != WL_CONNECTED) {
     delay(1000);
     Serial.println("Connecting...");
+    lcd.setCursor(0, 0); 
+    lcd.print("Connecting!..");
   }
   Serial.println(WiFi.localIP());
+  lcd.setCursor(0, 1); 
+  lcd.print(WiFi.localIP());
 
   if (!SPIFFS.begin()) {
     Serial.println("Failed to initialize SPIFFS");
@@ -86,12 +102,23 @@ void loop() {
     temperature = newTemperature;
     Serial.print("Temperature: ");
     Serial.println(temperature);
+    lcd.clear();
+    lcd.setCursor(0, 0);  
+    lcd.print("Temp: ");
+    lcd.setCursor(6, 0);  
+    lcd.print(temperature);
+    lcd.print(" C");
   }
 
   if (!isnan(newHumidity)) {
     humidity = newHumidity;
     Serial.print("Humidity: ");
-    Serial.println(humidity);
+    Serial.println(humidity);  
+    lcd.setCursor(0, 1);  
+    lcd.print("Humidity: ");
+    lcd.setCursor(10, 1); 
+    lcd.print(humidity);
+    lcd.print("%");
   }
 
   if (newFlameStatus == LOW || newFlameStatus == HIGH) {
