@@ -19,7 +19,7 @@ The system integrates with different sensors and actuators to gather data and pe
 ## Features
 - Real-time monitoring of temperature, humidity, and flame detection.
 - Remote control of home automation devices.
-- Alert notifications for critical events.
+- Alert notifications for critical events, including email notifications.
 - User-friendly web interface for easy interaction.
 - Expandable and customizable with support for additional sensors and actuators.
 
@@ -30,11 +30,13 @@ To set up the hardware components of the Home Automation and Monitoring System, 
 - ESP8266 microcontroller board
 - Temperature and humidity sensor (e.g., DHT11 or DHT22)
 - Flame detection sensor
--Liquid Crystal Display (LCD): Provides visual output for sensor readings and system status.
+- Liquid Crystal Display (LCD): Provides visual output for sensor readings and system status.
 - Wires for connecting the sensors to the ESP8266
 
-![Setup Image](setup.jpeg)
-![Setup2 Image](setup2.jpeg)
+<div align="center">
+  <img src="setup.jpeg" alt="Setup Image" width="400"/>
+  <img src="setup2.jpeg" alt="Setup2 Image" width="400"/>
+</div>
 
 Follow these steps to set up the hardware:
 
@@ -74,9 +76,14 @@ git clone https://github.com/mahmoudali2/Home-Automation-and-Monitoring-System.g
 2. View the real-time data on temperature, humidity, and flame detection.
 3. The LCD display connected to the system will also display the sensor readings.
 4. Control home automation devices through the web interface.
-5. Configure alerts and notifications for critical events.
+5. Configure alerts and notifications for critical events, including email alerts.
 6. Customize the system settings according to your preferences.
 7. Additional sensors and functionalities can be integrated into the system by extending the codebase.
+
+<div align="center">
+  <img src="email.jpeg" alt="Email Image" width="400"/>
+  <img src="email2.jpeg" alt="Email2 Image" width="400"/>
+</div>
 
 ## Contributing
 Contributions to this project are welcome. Feel free to open issues and submit pull requests to enhance the functionality, add new features, or fix any bugs.
@@ -91,6 +98,4 @@ We would like to acknowledge the contributions of the open-source community and 
 
 
 ## Contact
-For any inquiries or feedback, please contact me at [mahmoud.althaqel@gmail.com]
-
-Thank you for using the Home Automation and Monitoring System!
+For any inquiries or feedback, please contact me at [mahmoud.althaqel@gmail.com].

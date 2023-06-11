@@ -1,6 +1,4 @@
-
-//ijlhqbjzhxkaoflf
-// include the libraries
+// Include the libraries
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
 #include <Hash.h>
@@ -13,13 +11,27 @@
 #include <LiquidCrystal.h>
 #include <ESP_Mail_Client.h>
 
-
-
 const char* ssid = "Mahmoud iPhone";
 const char* password = "neutrino";
 
-const int rs = 16, en = 4, d4 = 2, d5 = 0, d6 = 12, d7 = 13;
-LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
+#define SMTP_HOST "smtp.gmail.com"
+#define SMTP_PORT 465
+
+/* The sign-in credentials */
+#define AUTHOR_EMAIL "home.notifications.alerts@gmail.com"
+#define AUTHOR_PASSWORD "ijlhqbjzhxkaoflf"
+
+/* Recipient's email */
+#define RECIPIENT_EMAIL "mahmoud.althaqel@gmail.com"
+
+/* The SMTP Session object used for Email sending */
+SMTPSession smtp;
+
+/* Callback function to get the Email sending status */
+void smtpCallback(SMTP_Status status);
+
+Session_Config session;
+LiquidCrystal lcd(16, 4, 2, 0, 12, 13);
 
 #define DHTPIN 14       // D5 - Digital pin connected to the DHT sensor
 #define flamePin 5      // D1 - Digital pin connected to the flame sensor
@@ -66,7 +78,6 @@ String processor(const String& var) {
 }
 
 void setup() {
-
   lcd.begin(16, 2);
   pinMode(flamePin, INPUT);
   Serial.begin(115200);
@@ -76,11 +87,11 @@ void setup() {
   while (WiFi.status() != WL_CONNECTED) {
     delay(1000);
     Serial.println("Connecting...");
-    lcd.setCursor(0, 0); 
+    lcd.setCursor(0, 0);
     lcd.print("Connecting!..");
   }
   Serial.println(WiFi.localIP());
-  lcd.setCursor(0, 1); 
+  lcd.setCursor(0, 1);
   lcd.print(WiFi.localIP());
 
   if (!SPIFFS.begin()) {
@@ -91,6 +102,43 @@ void setup() {
   server.on("/", HTTP_GET, handleRoot);
   server.on("/data", HTTP_GET, handleData);
   server.begin();
+
+  /* Enable debug via Serial port */
+  smtp.debug(1);
+
+  /* Set the callback function to get the sending results */
+  smtp.callback(smtpCallback);
+
+  /* Set the session config */
+  session.server.host_name = SMTP_HOST;
+  session.server.port = SMTP_PORT;
+  session.login.email = AUTHOR_EMAIL;
+  session.login.password = AUTHOR_PASSWORD;
+  session.login.user_domain = "";
+
+  /* Declare the message class */
+  SMTP_Message message;
+
+  /* Set the message headers */
+  message.sender.name = "Home Automation system";
+  message.sender.email = AUTHOR_EMAIL;
+  message.subject = "ESP Test Email";
+  message.addRecipient("Mahmoud", RECIPIENT_EMAIL);
+
+  /* Send HTML message */
+  String htmlMsg = "<div style=\"color:#2f4468;\"><h1>The ESP board is connected!</h1><p>- Sent from ESP board</p></div>";
+  message.html.content = htmlMsg.c_str();
+  message.text.charSet = "us-ascii";
+  message.html.transfer_encoding = Content_Transfer_Encoding::enc_7bit;
+
+  /* Connect to the server with the session config */
+  if (!smtp.connect(&session))
+    return;
+
+  /* Start sending Email and close the session */
+  if (!MailClient.sendMail(&smtp, &message))
+    Serial.println("Error sending Email: " + smtp.errorReason());
+
 }
 
 void loop() {
@@ -103,9 +151,9 @@ void loop() {
     Serial.print("Temperature: ");
     Serial.println(temperature);
     lcd.clear();
-    lcd.setCursor(0, 0);  
+    lcd.setCursor(0, 0);
     lcd.print("Temp: ");
-    lcd.setCursor(6, 0);  
+    lcd.setCursor(6, 0);
     lcd.print(temperature);
     lcd.print(" C");
   }
@@ -113,19 +161,62 @@ void loop() {
   if (!isnan(newHumidity)) {
     humidity = newHumidity;
     Serial.print("Humidity: ");
-    Serial.println(humidity);  
-    lcd.setCursor(0, 1);  
+    Serial.println(humidity);
+    lcd.setCursor(0, 1);
     lcd.print("Humidity: ");
-    lcd.setCursor(10, 1); 
+    lcd.setCursor(10, 1);
     lcd.print(humidity);
     lcd.print("%");
   }
 
   if (newFlameStatus == LOW || newFlameStatus == HIGH) {
     flameStatus = (newFlameStatus == LOW) ? 0 : 1;
-    Serial.print("Flame Status: ");
-    Serial.println(flameStatus);
+    if (flameStatus == HIGH) {
+      Serial.print("Flame status: ");
+      Serial.println("Flame detected");
+      sendAlertEmail();
+    } else {
+      Serial.print("Flame status: ");
+      Serial.println("No Flame");
+    }
   }
 
   delay(2000);
+}
+
+void sendAlertEmail() {
+  /* Declare the message class */
+  SMTP_Message alertMessage;
+
+  /* Set the message headers */
+  alertMessage.sender.name = "Home Auto System";
+  alertMessage.sender.email = AUTHOR_EMAIL;
+  alertMessage.subject = "Fire Alert!";
+  alertMessage.addRecipient("Mahmoud", RECIPIENT_EMAIL);
+
+  /* Send HTML message */
+  String htmlMsg = "<div style=\"color:#2f4468;\"><h1>Fire Alert!</h1><p>A fire has been detected in your home.</p></div>";
+  alertMessage.html.content = htmlMsg.c_str();
+  alertMessage.html.charSet = "us-ascii";
+  alertMessage.html.transfer_encoding = Content_Transfer_Encoding::enc_7bit;
+
+  /* Close the current session */
+  smtp.closeSession();
+
+  /* Create a new SMTP session */
+  if (!smtp.connect(&session))
+    return;
+
+  /* Start sending Email and close the session */
+  if (!MailClient.sendMail(&smtp, &alertMessage))
+    Serial.println("Error sending Email: " + smtp.errorReason());
+}
+
+/* Callback function to get the Email sending status */
+void smtpCallback(SMTP_Status status) {
+  if (status.success()) {
+    Serial.println("Message sent successfully.");
+  } else {
+    Serial.println("Error sending message: " + String(status.info()));
+  }
 }
