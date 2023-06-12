@@ -108,7 +108,7 @@ To integrate the system with the Blynk app, follow these steps:
 
 You can now monitor and control your Home Automation and Monitoring System from the Blynk app on your smartphone.
 
-![Blynk Image](blynk.png)
+![Blynk Image](blynk.jpeg)
 
 ## Contributing
 Contributions to this project are welcome. Feel free to open issues and submit pull requests to enhance the functionality, add new features, or fix any bugs.
