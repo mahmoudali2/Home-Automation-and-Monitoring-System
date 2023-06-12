@@ -1,3 +1,7 @@
+
+//#include <Blynk.h>
+
+
 // Include the libraries
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
@@ -10,9 +14,15 @@
 #include <ArduinoJson.h>
 #include <LiquidCrystal.h>
 #include <ESP_Mail_Client.h>
+#include <BlynkSimpleEsp8266.h>
 
 const char* ssid = "Mahmoud iPhone";
 const char* password = "neutrino";
+
+#define BLYNK_TEMPLATE_ID           "TMPL4kjWpdUpU"
+#define BLYNK_TEMPLATE_NAME         "Home Automation system"
+#define BLYNK_AUTH_TOKEN            "v1a6B3ieiLKCfAKagPXGklW-8C5IjcTK"
+
 
 #define SMTP_HOST "smtp.gmail.com"
 #define SMTP_PORT 465
@@ -139,9 +149,14 @@ void setup() {
   if (!MailClient.sendMail(&smtp, &message))
     Serial.println("Error sending Email: " + smtp.errorReason());
 
+
+  Blynk.begin(BLYNK_AUTH_TOKEN, ssid, password);  
+
 }
 
 void loop() {
+
+  Blynk.run();
   float newTemperature = dht.readTemperature();
   float newHumidity = dht.readHumidity();
   int newFlameStatus = digitalRead(flamePin);
@@ -156,6 +171,7 @@ void loop() {
     lcd.setCursor(6, 0);
     lcd.print(temperature);
     lcd.print(" C");
+    Blynk.virtualWrite(V4, temperature); 
   }
 
   if (!isnan(newHumidity)) {
@@ -167,6 +183,7 @@ void loop() {
     lcd.setCursor(10, 1);
     lcd.print(humidity);
     lcd.print("%");
+    Blynk.virtualWrite(V2, humidity); 
   }
 
   if (newFlameStatus == LOW || newFlameStatus == HIGH) {
@@ -175,12 +192,21 @@ void loop() {
       Serial.print("Flame status: ");
       Serial.println("Flame detected");
       sendAlertEmail();
+      Blynk.virtualWrite(V3,"Flame detected!"); 
+      Blynk.virtualWrite(V1, flameStatus); 
+      Blynk.logEvent("flame_alert", "Flame is detected at your home!");
     } else {
       Serial.print("Flame status: ");
       Serial.println("No Flame");
+      Blynk.virtualWrite(V3,"No Flame"); 
+      Blynk.virtualWrite(V1,flameStatus); 
     }
   }
 
+  
+
+
+  
   delay(2000);
 }
 
