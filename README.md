@@ -8,7 +8,7 @@
 - [Hardware Setup](#hardware-setup)
 - [Installation](#Installation)
 - [Usage](#usage)
-- [Blynk App Integration] (#Blynk-App-Integration)
+- [Blynk App Integration](#blynk-app-integration)
 - [Contributing](#contributing)
 
 
